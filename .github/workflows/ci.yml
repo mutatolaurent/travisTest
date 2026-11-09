@@ -1,0 +1,36 @@
+name: Symfony CI
+
+on:
+  push:
+    branches: ["main", "master", "dev"]
+  pull_request:
+    branches: ["main", "master", "dev"]
+
+jobs:
+  php-tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: ["8.2", "8.4"]
+
+    steps:
+      # 1. Récupérer le code source du projet
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configurer PHP et les extensions nécessaires pour Symfony
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, pdo_mysql
+          coverage: none
+
+      # 3. Installer les dépendances via Composer
+      - name: Install Composer dependencies
+        uses: ramsey/composer-install@v3
+
+      # 4. Lancer la suite de tests PHPUnit
+      - name: Run Unit Tests
+        run: vendor/bin/phpunit
